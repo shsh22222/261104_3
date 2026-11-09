@@ -1,9 +1,9 @@
 name: Deploy to GitHub Pages
 
-# 事前に Settings → Pages で Source を「GitHub Actions」にしてください。
+# Settings → Pages の Source が「GitHub Actions」であること（未設定なら自動で有効化を試みます）。
 on:
   push:
-    branches: [main]
+    branches: [main, claude/cool-rubin-wxcvdp]
   workflow_dispatch:
 
 permissions:
@@ -28,6 +28,8 @@ jobs:
           node-version: 22
       - run: npm test
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: app
