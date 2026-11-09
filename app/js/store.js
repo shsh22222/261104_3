@@ -17,6 +17,8 @@ export const DEFAULT_SETTINGS = {
   fadeDays: 7, // 1 | 7 | 30
   showCounts: false,
   minimal: false,
+  bodyEntry: 'hands', // インナーボディの入口: hands | feet | belly | chest | whole
+  breathPace: 'calm', // calm | deep | even
 };
 
 function fresh() {

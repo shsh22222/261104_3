@@ -1,52 +1,74 @@
 import { h, closeButton, exitRitual } from '../ui.js';
 import { bell, haptic } from '../audio.js';
-import { addMoment } from '../store.js';
+import { addMoment, settings } from '../store.js';
 import { back } from '../nav.js';
 
-export const INHALE = 4;
-export const EXHALE = 6;
 const SMALL = 0.62;
 
-/** 呼吸の円。吸って4秒、吐いて6秒。吐く息を長くすると体は落ち着く方へ向かう。 */
+/** 呼吸の速さ（秒）。吐く息を吸う息より長くすると、体は落ち着く方へ向かう。 */
+export const PACES = {
+  calm: { inhale: 4, exhale: 6, label: 'ゆったり（吸う4秒・吐く6秒）' },
+  deep: { inhale: 5, exhale: 7, label: 'さらにゆっくり（吸う5秒・吐く7秒）' },
+  even: { inhale: 5, exhale: 5, label: '均等（吸う5秒・吐く5秒）' },
+};
+export function pace() {
+  return PACES[settings().breathPace] || PACES.calm;
+}
+
+/** 呼吸の拍。吸う・吐くの切り替わりで呼ばれる。 */
+export function breathLoop({ onInhale, onExhale, onDone, cycles = Infinity, delay = 1300 } = {}) {
+  let cancelled = false;
+  const timers = [];
+  const wait = (ms, fn) => timers.push(setTimeout(() => !cancelled && fn(), ms));
+  const { inhale: IN, exhale: OUT } = pace();
+  let count = 0;
+  const inhale = () => {
+    onInhale?.(IN);
+    wait(IN * 1000, exhale);
+  };
+  const exhale = () => {
+    onExhale?.(OUT);
+    wait(OUT * 1000, () => {
+      count += 1;
+      if (count < cycles) inhale();
+      else onDone?.();
+    });
+  };
+  wait(delay, inhale);
+  return () => {
+    cancelled = true;
+    timers.forEach(clearTimeout);
+  };
+}
+
+/** 呼吸の円。 */
 export function orb(extraClass = '') {
   return h('div', { class: 'orb ' + extraClass, 'aria-hidden': 'true' }, h('div', { class: 'orb-halo' }), h('div', { class: 'orb-core' }));
 }
 
 export function runBreath(orbEl, labelEl, { cycles = 1, onDone } = {}) {
-  let cancelled = false;
-  const timers = [];
-  const wait = (ms, fn) => timers.push(setTimeout(() => !cancelled && fn(), ms));
-  let count = 0;
   orbEl.style.transition = 'transform 1.2s ease';
   orbEl.style.transform = `scale(${SMALL})`;
   labelEl.textContent = '';
-
-  const inhale = () => {
-    labelEl.textContent = '吸って';
-    haptic(18);
-    orbEl.style.transition = `transform ${INHALE}s cubic-bezier(.37,0,.63,1)`;
-    orbEl.style.transform = 'scale(1)';
-    wait(INHALE * 1000, exhale);
-  };
-  const exhale = () => {
-    labelEl.textContent = '吐いて';
-    haptic(8);
-    orbEl.style.transition = `transform ${EXHALE}s cubic-bezier(.37,0,.63,1)`;
-    orbEl.style.transform = `scale(${SMALL})`;
-    wait(EXHALE * 1000, () => {
-      count += 1;
-      if (count < cycles) inhale();
-      else {
-        labelEl.textContent = '';
-        onDone?.();
-      }
-    });
-  };
-  wait(1300, inhale);
-  return () => {
-    cancelled = true;
-    timers.forEach(clearTimeout);
-  };
+  return breathLoop({
+    cycles,
+    onInhale: (s) => {
+      labelEl.textContent = '吸って';
+      haptic(18);
+      orbEl.style.transition = `transform ${s}s cubic-bezier(.37,0,.63,1)`;
+      orbEl.style.transform = 'scale(1)';
+    },
+    onExhale: (s) => {
+      labelEl.textContent = '吐いて';
+      haptic(8);
+      orbEl.style.transition = `transform ${s}s cubic-bezier(.37,0,.63,1)`;
+      orbEl.style.transform = `scale(${SMALL})`;
+    },
+    onDone: () => {
+      labelEl.textContent = '';
+      onDone?.();
+    },
+  });
 }
 
 /** #breath 意識的な一呼吸。 */

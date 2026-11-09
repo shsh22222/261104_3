@@ -18,6 +18,10 @@
   --orb-core: #f2e3bd;
   --orb-mid: rgba(207, 169, 98, 0.34);
   --orb-far: rgba(207, 169, 98, 0);
+  --glow-core: #fbefc9;
+  --glow-mid: #d9b06a;
+  --figure-fill: rgba(219, 228, 231, 0.07);
+  --figure-edge: rgba(219, 228, 231, 0.12);
   --on-orb: #3b2d14;
   --sos: #dd9886;
   --danger: #e2806e;
@@ -64,6 +68,10 @@
     --orb-core: #fff3d4;
     --orb-mid: rgba(186, 136, 52, 0.36);
     --orb-far: rgba(186, 136, 52, 0);
+  --glow-core: #fff4d2;
+  --glow-mid: #c58a2c;
+  --figure-fill: rgba(21, 33, 42, 0.07);
+  --figure-edge: rgba(21, 33, 42, 0.1);
     --on-orb: #4a3612;
     --sos: #9e4a37;
     --danger: #a63e2b;
@@ -97,6 +105,10 @@
   --orb-core: #fff3d4;
   --orb-mid: rgba(186, 136, 52, 0.36);
   --orb-far: rgba(186, 136, 52, 0);
+  --glow-core: #fff4d2;
+  --glow-mid: #c58a2c;
+  --figure-fill: rgba(21, 33, 42, 0.07);
+  --figure-edge: rgba(21, 33, 42, 0.1);
   --on-orb: #4a3612;
   --sos: #9e4a37;
   --danger: #a63e2b;
@@ -1912,6 +1924,133 @@ body.holding .tabbar {
   color: var(--sky-star);
 }
 
+/* ---------- インナーボディの図 ---------- */
+.figure {
+  --phase-dur: 4s;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  max-width: 100%;
+}
+.figure svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.figure .silhouette {
+  fill: var(--figure-fill);
+  stroke: var(--figure-fill);
+}
+.figure .silhouette circle,
+.figure .silhouette rect {
+  stroke: var(--figure-edge);
+  stroke-width: 0.8;
+}
+.figure .glow,
+.figure .field {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  transition: opacity 2.4s ease, transform 2.4s ease;
+}
+.figure .glow.on {
+  opacity: 0.75;
+}
+.figure.is-whole .glow.on {
+  opacity: 0.42;
+}
+.figure.is-whole .field {
+  opacity: 0.7;
+}
+.figure[data-phase] .glow,
+.figure[data-phase] .field {
+  transition: opacity var(--phase-dur) cubic-bezier(0.37, 0, 0.63, 1), transform var(--phase-dur) cubic-bezier(0.37, 0, 0.63, 1);
+}
+.figure[data-phase="in"] .glow.on {
+  opacity: 1;
+  transform: scale(1.28);
+}
+.figure[data-phase="in"].is-whole .glow.on {
+  opacity: 0.6;
+}
+.figure[data-phase="in"].is-whole .field {
+  opacity: 1;
+  transform: scale(1.06);
+}
+.figure[data-phase="out"] .glow.on {
+  transform: scale(1);
+}
+.figure.resting .glow.on {
+  animation: rest-glow 10s cubic-bezier(0.37, 0, 0.63, 1) infinite;
+}
+@keyframes rest-glow {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(0.94);
+  }
+  40% {
+    opacity: 0.85;
+    transform: scale(1.12);
+  }
+}
+.figure-btn,
+.breath-pad {
+  display: block;
+  width: min(48vw, 200px);
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 40% 40% 20% 20%;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
+}
+.breath-pad {
+  width: min(56vw, 230px);
+}
+.figure-player {
+  width: min(36vw, 150px);
+}
+.step-wrap.has-figure {
+  flex-direction: column;
+  gap: 22px;
+}
+.figure-preview {
+  width: min(40vw, 170px);
+  margin: 4px auto 8px;
+}
+.entry .chips {
+  justify-content: center;
+}
+.entry-note {
+  text-align: center;
+  margin: 0 auto;
+}
+.hold-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.entry-link {
+  min-height: 36px;
+  padding: 4px 12px;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: var(--t-1);
+  letter-spacing: 0.16em;
+}
+body.holding .hold-meta {
+  opacity: 0;
+  pointer-events: none;
+}
+.hold-meta {
+  transition: opacity 1s ease;
+}
+
 @media (min-width: 720px) {
   .step-text {
     font-size: 28px;
@@ -1928,6 +2067,9 @@ body.holding .tabbar {
   }
   .in {
     animation-duration: 0.01s;
+  }
+  .figure.resting .glow.on {
+    animation: none;
   }
   .hold-line.in,
   .cloud-guide.in {

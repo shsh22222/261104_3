@@ -51,24 +51,25 @@ try {
 
   log('はじめの体験（指を置く）');
   await page.goto(base);
-  await expectText('指を、円の上に置いてください');
+  await expectText('画面に指を置いて、そのままに');
   if ((await page.textContent('#view')).includes('null')) throw new Error('画面に "null" が表示されている');
   await shot('01-welcome');
   await hold('#welcome-orb', 8000, async () => {
-    await expectText('思考が来ても、そのままに');
+    await expectText('その手の内側に、何か感じますか');
     if (!(await page.evaluate(() => document.body.classList.contains('holding')))) throw new Error('指を置いても静かにならない');
     await shot('01b-welcome-holding');
   });
-  await expectText('いま、少し静かになりましたか');
+  await expectText('手の内側に、何か感じましたか');
   await shot('01c-welcome-after');
   await page.click('#welcome-start');
 
   log('ホームで指を置く');
   await expectText('今日の問い');
-  await page.click('.orb-btn');
+  await page.click('.figure-btn');
   await expectText('指を置いたまま、待ってみてください');
-  await hold('.orb-btn', 16000, async () => {
-    await expectText('それに気づいているのは、誰だろう');
+  await hold('.figure-btn', 26000, async () => {
+    await expectText('息は、体がしています');
+    if (!(await page.locator('.figure[data-phase] .glow.on').count())) throw new Error('図が呼吸していない');
     await page.waitForTimeout(2600); // CSS の遷移が落ち着くのを待つ
     await shot('02a-home-holding');
   });
@@ -92,7 +93,8 @@ try {
   await expectText('今日の問い');
   await expectText('山茶始開');
   await expectText('朝のワーク');
-  await expectText('思考の雲を眺める');
+  await expectText('目覚めの体');
+  await expectText('入口: 手');
   await shot('03-home');
   await page.getByRole('button', { name: 'いま感じた' }).first().click();
   await expectText('感じた');
@@ -127,10 +129,50 @@ try {
   await page.locator('.exit-actions .btn', { hasText: '閉じる' }).last().click();
   await expectText('教えの地図');
 
+  log('インナーボディのワーク（図と呼吸）');
+  await page.goto(base + '#play-body-breath');
+  await page.click('#pv-start');
+  await page.clock.runFor(3000);
+  if (!(await page.locator('.step-wrap .figure .glow[data-r="belly"].on').count())) throw new Error('お腹が光らない');
+  await page.clock.runFor(12000);
+  if (!(await page.locator('.step-wrap .figure[data-phase]').count())) throw new Error('ワークの図が呼吸しない');
+  await page.waitForTimeout(1500);
+  await shot('05b-body-breath');
+  await page.clock.runFor(130000);
+  await expectText('目を上げて。');
+  await page.mouse.click(195, 300);
+  await page.locator('.exit-actions .btn', { hasText: '閉じる' }).last().click();
+
+  log('呼吸とともに');
+  await page.goto(base + '#breathe-with');
+  await page.click('#bw-start');
+  const pad = await page.locator('#bw-pad').boundingBox();
+  await page.mouse.move(pad.x + pad.width / 2, pad.y + pad.height / 2);
+  for (let k = 0; k < 8; k++) {
+    const sec = 3 + k * 0.4; // だんだんゆっくりになる呼吸
+    await page.mouse.down();
+    await page.clock.runFor(sec * 1000);
+    await page.mouse.up();
+    await page.clock.runFor(sec * 1400);
+  }
+  await shot('05c-breathe-with');
+  await page.getByRole('button', { name: 'おわる' }).click();
+  await expectText('ひとりでにゆっくりになっていきました');
+  await page.locator('.exit-actions .btn', { hasText: '閉じる' }).last().click();
+
+  log('体の入口を選ぶ');
+  await page.goto(base + '#body-entry');
+  await page.getByRole('button', { name: '足', exact: true }).click();
+  await expectText('地に足がつく入口です');
+  await shot('05d-entry');
+  await page.goto(base + '#home');
+  await expectText('入口: 足');
+
   log('教えの地図');
+  await page.goto(base + '#practice');
   await page.getByRole('button', { name: /教えの地図/ }).click();
-  await page.getByText('ペインボディ').click();
-  await expectText('過去の感情的な痛み');
+  await page.getByText('インナーボディ（このアプリの軸）').click();
+  await expectText('体の内側にある、生き生きとしたエネルギーの感覚');
   await shot('08-learn');
 
   log('日常');
@@ -298,7 +340,7 @@ try {
   if (stored.moments.length !== 0 || stored.settings.minimal) throw new Error('消去されていない');
 
   log('横幅のはみ出し');
-  for (const r of ['home', 'practice', 'daily', 'sky', 'clouds', 'prefs', 'bells', 'haiku', 'samu', 'learn', 'anchors']) {
+  for (const r of ['home', 'practice', 'daily', 'sky', 'clouds', 'body-entry', 'breathe-with', 'prefs', 'bells', 'haiku', 'samu', 'learn', 'anchors']) {
     await page.goto(base + '#' + r);
     const over = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     if (over > 0) throw new Error(`#${r} が横にはみ出している: ${over}px`);

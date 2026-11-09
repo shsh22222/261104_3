@@ -11,6 +11,8 @@ import { gateView } from './views/gate.js';
 import { bellsView, bellView, bellSessionView } from './views/bells.js';
 import { sosView } from './views/sos.js';
 import { cloudsView } from './views/clouds.js';
+import { entryView } from './views/body.js';
+import { breatheWithView } from './views/breathewith.js';
 import { haikuView } from './views/haiku.js';
 import { samuView } from './views/samu.js';
 import { eveningView } from './views/evening.js';
@@ -36,6 +38,8 @@ const ROUTES = {
   'bell-session': { view: bellSessionView, immersive: true },
   sos: { view: sosView, immersive: true },
   clouds: { view: cloudsView, tab: 'practice' },
+  'body-entry': { view: entryView, tab: 'home' },
+  'breathe-with': { view: breatheWithView, immersive: true },
   evening: { view: eveningView, immersive: true },
   welcome: { view: welcomeView, immersive: true },
   inquiry: { view: (root) => playerView(root, 'inquiry'), immersive: true },

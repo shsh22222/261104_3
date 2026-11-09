@@ -3,6 +3,8 @@ import { go } from '../nav.js';
 import { settings, setSetting, exportJSON, resetAll } from '../store.js';
 import { bell, canSpeak, speak, unlockAudio } from '../audio.js';
 import { applyTheme } from '../theme.js';
+import { PACES } from './breath.js';
+import { ENTRIES } from '../content.js';
 
 function toggle(id, label, key, note, after) {
   const input = h('input', {
@@ -56,6 +58,17 @@ export function prefsView(root) {
   const exportOut = h('pre', { class: 'export', hidden: true });
 
   root.append(
+    h(
+      'section',
+      { class: 'group' },
+      h('h2', { class: 'group-title' }, '体と呼吸'),
+      h(
+        'div',
+        { class: 'prefs' },
+        choice('pf-entry', 'インナーボディの入口', 'bodyEntry', ENTRIES.map((e) => [e.id, e.label])),
+        choice('pf-pace', '呼吸の速さ', 'breathPace', Object.entries(PACES).map(([k, v]) => [k, v.label])),
+      ),
+    ),
     h(
       'section',
       { class: 'group' },

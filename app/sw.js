@@ -1,6 +1,6 @@
 // オフラインでも開けるように、アプリ本体をキャッシュする。
 // ファイルを追加・変更したら VERSION を上げる（tests/unit/sw.test.mjs が一覧の漏れを検出する）。
-const VERSION = 'ma-v2';
+const VERSION = 'ma-v3';
 const FONT_CACHE = 'ma-fonts';
 
 const ASSETS = [
@@ -23,10 +23,13 @@ const ASSETS = [
   './js/lib/day.js',
   './js/lib/ics.js',
   './js/lib/perception.js',
+  './js/lib/rhythm.js',
   './js/lib/seasons.js',
   './js/lib/sky.js',
   './js/views/bells.js',
+  './js/views/body.js',
   './js/views/breath.js',
+  './js/views/breathewith.js',
   './js/views/clouds.js',
   './js/views/daily.js',
   './js/views/evening.js',

@@ -2,10 +2,11 @@
 // 指を置いているあいだだけ、周りが消え、円が呼吸し、言葉が一つずつ現れる。
 
 import { h } from '../ui.js';
-import { runBreath } from './breath.js';
+import { breathLoop } from './breath.js';
+import { entryRegions } from './body.js';
 import { bell, haptic, unlockAudio } from '../audio.js';
-import { addMoment } from '../store.js';
-import { HOLD_LINES, OUTWARD } from '../content.js';
+import { addMoment, settings } from '../store.js';
+import { holdSequence, OUTWARD } from '../content.js';
 
 const ENTER_MS = 550; // これより短い接触は「タップ」として扱う
 
@@ -14,12 +15,12 @@ export function pickOutward() {
 }
 
 /**
- * @param {HTMLElement} btn  指を置く要素（中に .orb を含む）
- * @param {{ line?: HTMLElement, onEnter?: () => void, onRelease?: (heldMs:number) => void, onTap?: () => void }} opts
+ * 指を置いているあいだ、インナーボディの図に光がひろがり、呼吸とともに満ちて広がる。
+ * @param {HTMLElement} btn  指を置く要素
+ * @param {{ figure: ReturnType<import('./body.js').bodyFigure>, line?: HTMLElement, onEnter?: () => void, onRelease?: (heldMs:number) => void, onTap?: () => void }} opts
  * @returns {() => void} 後片付け
  */
-export function attachHold(btn, { line, onEnter, onRelease, onTap } = {}) {
-  const orbEl = btn.querySelector('.orb');
+export function attachHold(btn, { figure, line, onEnter, onRelease, onTap } = {}) {
   let downAt = 0;
   let entered = false;
   let enterTimer = null;
@@ -54,11 +55,23 @@ export function attachHold(btn, { line, onEnter, onRelease, onTap } = {}) {
   function enter() {
     entered = true;
     document.body.classList.add('holding');
-    orbEl.classList.remove('orb-rest');
+    figure.el.classList.remove('resting');
     bell('soft');
     haptic(20);
-    stopBreath = runBreath(orbEl, document.createElement('span'), { cycles: 999 });
-    lineTimers = HOLD_LINES.map(([at, text]) => setTimeout(() => showLine(text), at));
+    stopBreath = breathLoop({
+      delay: 400,
+      onInhale: (sec) => {
+        figure.phase('in', sec);
+        haptic(14);
+      },
+      onExhale: (sec) => figure.phase('out', sec),
+    });
+    lineTimers = holdSequence(settings().bodyEntry).map(([at, regions, text]) =>
+      setTimeout(() => {
+        figure.light(regions);
+        showLine(text);
+      }, at),
+    );
     onEnter?.();
   }
 
@@ -67,13 +80,11 @@ export function attachHold(btn, { line, onEnter, onRelease, onTap } = {}) {
     lineTimers.forEach(clearTimeout);
     lineTimers = [];
     document.body.classList.remove('holding');
-    orbEl.style.transition = 'transform 1.6s cubic-bezier(.37,0,.63,1)';
-    orbEl.style.transform = 'scale(0.76)';
+    figure.phase(null);
     restTimer = setTimeout(() => {
-      orbEl.style.transition = '';
-      orbEl.style.transform = '';
-      orbEl.classList.add('orb-rest');
-    }, 1600);
+      figure.light(entryRegions(settings().bodyEntry));
+      figure.el.classList.add('resting');
+    }, 1800);
     if (line) {
       line.classList.remove('in');
       line.textContent = '';

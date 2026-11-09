@@ -26,9 +26,11 @@ export function practiceView(root) {
       h(
         'ul',
         { class: 'list' },
-        row({ title: '思考の雲', sub: '書いた思考が、雲になって流れていく', meta: '2分', onclick: () => go('clouds'), cls: 'is-feature' }),
+        row({ title: '呼吸とともに', sub: '吸うあいだ指を置き、吐くあいだ離す', meta: '2分', onclick: () => go('breathe-with'), cls: 'is-feature' }),
+        row({ title: '体の入口を選ぶ', sub: '手・足・お腹・胸・全身。感じやすい場所から', onclick: () => go('body-entry') }),
         row({ title: '意識的な一呼吸', sub: 'すべてのワークの最小単位', meta: '10秒', onclick: () => go('breath') }),
         row({ title: 'いま、揺れている', sub: 'イライラ、焦り、モヤモヤの中で', meta: '2分〜', onclick: () => go('sos'), cls: 'is-sos' }),
+        row({ title: '思考の雲', sub: '書いた思考が、雲になって流れていく', meta: '2分', onclick: () => go('clouds') }),
       ),
     ),
   );

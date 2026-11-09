@@ -1,9 +1,9 @@
 import { h, ICONS, toast } from '../ui.js';
-import { orb } from './breath.js';
+import { bodyFigure, entryRegions } from './body.js';
 import { attachHold, showOutward } from './presence.js';
 import { go } from '../nav.js';
 import { get, settings, addMoment } from '../store.js';
-import { INQUIRIES, ANCHORS } from '../content.js';
+import { INQUIRIES, ANCHORS, ENTRIES } from '../content.js';
 import { seasonFor } from '../lib/seasons.js';
 import { partOfDay, pickDaily, skyTone } from '../lib/day.js';
 
@@ -39,9 +39,9 @@ function anchorRows() {
 function nextWork(now) {
   const part = partOfDay(now);
   const W = {
-    morning: { when: '朝のワーク', title: '思考の雲を眺める', note: '起きぬけの頭に浮かぶものを、空に流してから一日を始める。', min: '2分', to: 'clouds', extra: anchorRows },
-    day: { when: '昼のワーク', title: '作務', note: '次の皿洗いや歩く時間を、始まりと終わりの鐘で区切る。', min: '3分〜', to: 'samu' },
-    evening: { when: '夕べのワーク', title: '今日を手放す', note: '今日ほんとうに在った一瞬を一行だけ書いて、手放す。', min: '1分', to: 'evening' },
+    morning: { when: '朝のワーク', title: '目覚めの体', note: '起き上がる前に、体の内側を感じてから一日を始める。', min: '1分', to: 'play-waking', extra: anchorRows },
+    day: { when: '昼のワーク', title: '目を開けたまま', note: '体の内側に根を下ろしたまま、目の前の世界を見る。', min: '2分', to: 'play-eyes-open' },
+    evening: { when: '夕べのワーク', title: '呼吸とともに', note: '吸うあいだ指を置き、吐くあいだ離す。体の呼吸に、指がついていく。', min: '2分', to: 'breathe-with' },
     night: { when: '夜のワーク', title: '眠る前に', note: '横になって、体の内側へ。終わりの鐘は鳴りません。', min: '3分', to: 'play-sleep' },
   }[part];
   return h(
@@ -65,11 +65,16 @@ export function homeView(root) {
   const season = seasonFor(now);
   root.style.setProperty('--now-glow', skyTone(now).glow);
 
+  const entry = ENTRIES.find((e) => e.id === s.bodyEntry) || ENTRIES[0];
+  const fig = bodyFigure('resting');
+  fig.light(entryRegions(entry.id));
   const line = h('p', { class: 'hold-line', 'aria-live': 'polite' });
-  const hint = h('p', { class: 'hold-hint' }, '円に指を置いて、そのままに');
-  const orbBtn = h('button', { class: 'orb-btn', 'aria-label': '指を置く（長押し）' }, orb('orb-rest'), h('span', { class: 'orb-label' }, '指を置く'));
+  const hint = h('p', { class: 'hold-hint' }, '指を置いて、体の内側へ');
+  const orbBtn = h('button', { class: 'figure-btn', 'aria-label': '指を置く（長押し）。体の内側を感じる' }, fig.el);
+  const entryLink = h('button', { class: 'entry-link', onclick: () => go('body-entry') }, `入口: ${entry.label}`);
   let closeOutward = () => {};
   const detach = attachHold(orbBtn, {
+    figure: fig,
     line,
     onTap: () => toast('指を置いたまま、待ってみてください。'),
     onRelease: (held) => {
@@ -84,7 +89,7 @@ export function homeView(root) {
     h('button', { class: 'icon-btn', 'aria-label': '設定', onclick: () => go('prefs'), svg: ICONS.gear }),
   );
 
-  const center = h('div', { class: 'home-center hold-keep' }, orbBtn, line, hint);
+  const center = h('div', { class: 'home-center hold-keep' }, orbBtn, line, h('div', { class: 'hold-meta' }, hint, entryLink));
   const inquiry = h('button', { class: 'inquiry', onclick: () => go('inquiry') }, h('span', { class: 'eyebrow' }, '今日の問い'), h('span', { class: 'inquiry-text' }, pickDaily(INQUIRIES, now)));
 
   if (s.minimal) {
@@ -102,8 +107,9 @@ export function homeView(root) {
         h(
           'div',
           { class: 'side-doors' },
+          h('button', { class: 'side-door', onclick: () => go('play-hands') }, '手のいのち'),
+          h('button', { class: 'side-door', onclick: () => go('play-body-breath') }, '体が呼吸している'),
           h('button', { class: 'side-door is-sos', onclick: () => go('sos') }, 'いま、揺れている'),
-          h('button', { class: 'side-door', onclick: () => go('haiku') }, '今の一句'),
           h('button', { class: 'side-door', onclick: () => go('clouds') }, '思考の雲'),
         ),
         h(
