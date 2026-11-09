@@ -96,6 +96,7 @@ export function dailyView(root) {
     card('今の一句', '見えるもの、聞こえるものを、評価を入れずに一行で写します。', [h('button', { class: 'btn btn-quiet', onclick: () => go('haiku') }, '書く')]),
     card('作務', '皿洗いや歩くことを、始まりと終わりの鐘で区切って修行にします。', [h('button', { class: 'btn btn-quiet', onclick: () => go('samu') }, 'はじめる')]),
     card('今日を手放す', '夜、今日ほんとうに在った一瞬を一行だけ書いて、手放します。', [h('button', { class: 'btn btn-quiet', onclick: () => go('evening') }, '一行を書く')]),
+    h('button', { class: 'row-link sky-door', onclick: () => go('sky') }, '夜空を見る（在った瞬間は、星になって消えていきます）', h('span', { svg: ICONS.arrow })),
   );
 }
 

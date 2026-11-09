@@ -1,4 +1,4 @@
-import { h, header } from '../ui.js';
+import { h, header, ICONS } from '../ui.js';
 import { go } from '../nav.js';
 import { get, settings } from '../store.js';
 import { starPosition, starAlpha, starRadius } from '../lib/sky.js';
@@ -31,7 +31,7 @@ export function bellReflection(samples, now = Date.now()) {
 export function skyView(root) {
   const s = settings();
   const fade = s.fadeDays;
-  root.append(header('夜空', `在った瞬間が、星になります。星は${fade}日かけて消えていきます。`));
+  root.append(header('夜空', `在った瞬間が、星になります。星は${fade}日かけて消えていきます。`, h('button', { class: 'icon-btn', 'aria-label': '日常に戻る', onclick: () => go('daily'), svg: ICONS.close })));
 
   const now = Date.now();
   const moments = get().moments.filter((m) => starAlpha(m.t, now, fade) > 0);

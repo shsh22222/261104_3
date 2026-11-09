@@ -191,8 +191,7 @@ export function playerView(root, id) {
     voidEl.remove();
     body.classList.remove('player');
     exitEl = exitRitual({
-      lines: p.quietEnd ? ['このまま、目を閉じて。'] : ['画面から目を上げて、', '周りを見てください。'],
-      title: p.quietEnd ? 'おやすみなさい。' : 'おかえりなさい。',
+      ...(p.quietEnd ? { title: 'おやすみなさい。', lines: ['このまま、目を閉じて。'], outward: false } : {}),
       actions: [h('button', { class: 'btn', onclick: back }, '閉じる')],
     });
     body.replaceChildren(exitEl);

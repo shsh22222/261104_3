@@ -163,8 +163,7 @@ export function prefsView(root) {
       h('h2', { class: 'group-title' }, 'このアプリについて'),
       h('p', { class: 'body-text' }, '「間（ま）」は、思考と思考のあいだの静けさを思い出すための、小さな鐘です。アカウントも解析もなく、何も送信しません。'),
       h('p', { class: 'body-text' }, 'エックハルト・トールの教えに着想を得ていますが、トール氏および関係団体とは関係のない非公式のアプリです。教えの要約はすべて私たちの言葉による解釈です。'),
-      h('p', { class: 'body-text' }, '医療や心理療法の代わりにはなれません。強い苦しみが続くときは、専門家や相談窓口を頼ってください。'),
-      h('div', { class: 'daily-actions' }, h('button', { class: 'btn btn-quiet', onclick: () => go('crisis') }, '相談窓口'), h('button', { class: 'btn btn-quiet', onclick: () => go('learn') }, '教えの地図'), h('button', { class: 'btn btn-quiet', onclick: () => go('welcome') }, 'はじめの案内')),
+      h('div', { class: 'daily-actions' }, h('button', { class: 'btn btn-quiet', onclick: () => go('learn') }, '教えの地図'), h('button', { class: 'btn btn-quiet', onclick: () => go('sky') }, '夜空'), h('button', { class: 'btn btn-quiet', onclick: () => go('welcome') }, 'はじめの体験')),
       h(
         'details',
         { class: 'howto' },

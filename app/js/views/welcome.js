@@ -1,61 +1,53 @@
-import { h } from '../ui.js';
+import { h, toast } from '../ui.js';
 import { go } from '../nav.js';
 import { update } from '../store.js';
 import { orb } from './breath.js';
-import { unlockAudio } from '../audio.js';
+import { attachHold, pickOutward } from './presence.js';
 
-const SLIDES = [
-  {
-    title: '間',
-    kana: 'ま',
-    lines: ['思考と思考のあいだには、', '静かな「間」があります。', 'このアプリは、それを思い出すための', '小さな鐘です。'],
-  },
-  {
-    title: 'あなたを、画面に引き留めません。',
-    lines: ['使うのは一日に数回、数十秒。', '終わったら、画面から目を上げてください。'],
-  },
-  {
-    title: '記録は、星になって消えていきます。',
-    lines: ['数えず、比べず、競いません。', '在ることは、記録の中ではなく、', 'いま、ここにあります。'],
-    fine: '医療や心理療法の代わりにはなれません。つらさが強いときは、専門家や相談窓口を頼ってください。',
-  },
-];
-
-/** #welcome はじめの案内。 */
+/** #welcome はじめの30秒は、説明ではなく体験。 */
 export function welcomeView(root) {
-  let k = 0;
-  const stage = h('div', { class: 'stage welcome' });
+  const stage = h('div', { class: 'stage welcome hold-scope' });
   root.append(stage);
+  let detach = () => {};
 
-  const finish = (target) => {
+  const finish = () => {
     update((st) => (st.onboarded = true));
-    unlockAudio();
-    go(target);
+    go('home');
   };
 
-  function draw() {
-    const s = SLIDES[k];
-    const last = k === SLIDES.length - 1;
-    const parts = [
-      k === 0 ? h('div', { class: 'orb-wrap orb-wrap-small' }, orb('orb-rest')) : null,
-      s.kana
-        ? h('h1', { class: 'welcome-mark', tabindex: '-1' }, h('ruby', null, s.title, h('rt', null, s.kana)))
-        : h('h1', { class: 'welcome-title', tabindex: '-1' }, s.title),
-      h('p', { class: 'welcome-lines' }, s.lines.map((l) => h('span', null, l))),
-      s.fine ? h('p', { class: 'fine' }, s.fine) : null,
-      h('div', { class: 'dots', 'aria-hidden': 'true' }, SLIDES.map((_, i) => h('span', { class: i === k ? 'on' : '' }))),
-      h(
-        'div',
-        { class: 'exit-actions' },
-        last
-          ? h('button', { class: 'btn btn-primary', id: 'welcome-start', onclick: () => finish('breath') }, '最初の一呼吸へ')
-          : h('button', { class: 'btn btn-primary', id: 'welcome-next', onclick: () => ((k += 1), draw()) }, '次へ'),
-        !last ? h('button', { class: 'link-btn', onclick: () => finish('home') }, 'とばす') : null,
-      ),
-    ];
-    // replaceChildren は null を文字列 "null" にしてしまうので、取り除いてから渡す
-    stage.replaceChildren(...parts.filter(Boolean));
+  function first() {
+    const line = h('p', { class: 'hold-line', 'aria-live': 'polite' });
+    const btn = h('button', { class: 'orb-btn', id: 'welcome-orb', 'aria-label': '指を置く（長押し）' }, orb('orb-rest'), h('span', { class: 'orb-label' }, '指を置く'));
+    stage.replaceChildren(
+      h('h1', { class: 'welcome-mark', tabindex: '-1' }, h('ruby', null, '間', h('rt', null, 'ま'))),
+      h('p', { class: 'welcome-lead' }, '指を、円の上に置いてください。'),
+      h('div', { class: 'home-center hold-keep' }, btn, line),
+      h('button', { class: 'link-btn', onclick: finish }, 'とばす'),
+    );
+    detach = attachHold(btn, {
+      line,
+      onTap: () => toast('指を置いたまま、待ってみてください。'),
+      onRelease: (held) => {
+        if (held < 3500) {
+          toast('もう少しだけ、そのままで。');
+          return;
+        }
+        detach();
+        second();
+      },
+    });
+  }
+
+  function second() {
+    stage.replaceChildren(
+      h('h1', { class: 'welcome-title', tabindex: '-1' }, 'いま、少し静かになりましたか。'),
+      h('p', { class: 'welcome-lines' }, h('span', null, 'その静けさが、このアプリのすべてです。'), h('span', null, '思考と思考のあいだにある「間」を、'), h('span', null, '一日に何度も思い出すための小さな道具です。')),
+      h('p', { class: 'exit-outward' }, pickOutward()),
+      h('div', { class: 'exit-actions' }, h('button', { class: 'btn btn-primary', id: 'welcome-start', onclick: finish }, 'はじめる')),
+    );
     stage.querySelector('h1')?.focus({ preventScroll: true });
   }
-  draw();
+
+  first();
+  return () => detach();
 }

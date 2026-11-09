@@ -1,6 +1,6 @@
 // ハッシュによる画面遷移。ルート名は英数字とハイフンのみ（#home, #play-watcher など）。
 
-export const TABS = ['home', 'practice', 'daily', 'sky'];
+export const TABS = ['home', 'practice', 'daily'];
 
 let lastTab = 'home';
 let renderHook = () => {};
@@ -15,7 +15,7 @@ export function currentRoute() {
 }
 
 export function rememberTab(name) {
-  if (TABS.includes(name) || name === 'learn' || name === 'prefs') lastTab = name;
+  if (TABS.includes(name) || ['learn', 'prefs', 'sky'].includes(name)) lastTab = name;
 }
 
 export function go(name) {

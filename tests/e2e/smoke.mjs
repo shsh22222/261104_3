@@ -37,39 +37,70 @@ try {
   const expectText = async (text) => {
     await page.getByText(text, { exact: false }).first().waitFor({ state: 'visible', timeout: 4000 });
   };
+  // 円に指を置いて、ms ミリ秒そのままにする
+  const hold = async (selector, ms, during) => {
+    const box = await page.locator(selector).boundingBox();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.clock.runFor(ms);
+    if (during) await during();
+    await page.mouse.up();
+  };
 
   await page.clock.install({ time: new Date('2026-11-09T07:30:00') });
 
-  log('はじめの案内');
+  log('はじめの体験（指を置く）');
   await page.goto(base);
-  await expectText('思考と思考のあいだには');
+  await expectText('指を、円の上に置いてください');
   if ((await page.textContent('#view')).includes('null')) throw new Error('画面に "null" が表示されている');
   await shot('01-welcome');
-  await page.click('#welcome-next');
-  await page.click('#welcome-next');
-  await expectText('記録は、星になって');
+  await hold('#welcome-orb', 8000, async () => {
+    await expectText('思考が来ても、そのままに');
+    if (!(await page.evaluate(() => document.body.classList.contains('holding')))) throw new Error('指を置いても静かにならない');
+    await shot('01b-welcome-holding');
+  });
+  await expectText('いま、少し静かになりましたか');
+  await shot('01c-welcome-after');
   await page.click('#welcome-start');
 
+  log('ホームで指を置く');
+  await expectText('今日の問い');
+  await page.click('.orb-btn');
+  await expectText('指を置いたまま、待ってみてください');
+  await hold('.orb-btn', 16000, async () => {
+    await expectText('それに気づいているのは、誰だろう');
+    await page.waitForTimeout(2600); // CSS の遷移が落ち着くのを待つ
+    await shot('02a-home-holding');
+  });
+  await expectText('目を上げて。');
+  await page.waitForTimeout(1600);
+  await shot('02b-outward');
+  await page.clock.runFor(11000);
+  if (await page.locator('.outward').count()) throw new Error('目を上げての画面が消えない');
+
   log('一呼吸');
+  await page.goto(base + '#breath');
   await expectText('ただ、一つの呼吸を感じます');
   await page.clock.runFor(5500);
   await expectText('吐いて');
   await shot('02-breath');
   await page.clock.runFor(6500);
-  await expectText('おかえりなさい');
+  await expectText('目を上げて。');
   await page.locator('.exit-actions .btn', { hasText: '閉じる' }).last().click();
 
   log('ホーム（朝）');
   await expectText('今日の問い');
   await expectText('山茶始開');
-  await expectText('今日の鐘');
+  await expectText('朝のワーク');
+  await expectText('思考の雲を眺める');
   await shot('03-home');
   await page.getByRole('button', { name: 'いま感じた' }).first().click();
-  await expectText('夜空に星が一つ');
+  await expectText('感じた');
 
   log('実践の一覧');
   await page.click('a[data-tab="practice"]');
   await expectText('思考を見守る');
+  if ((await page.locator('.tabbar a').count()) !== 3) throw new Error('タブが3つではない');
   await shot('04-practice');
 
   log('実践プレイヤー');
@@ -87,7 +118,7 @@ try {
   await expectText('コップ、植物、自分の手');
   await page.getByRole('button', { name: '再開' }).click();
   await page.clock.runFor(100000);
-  await expectText('おかえりなさい');
+  await expectText('目を上げて。');
   await page.clock.runFor(15000);
   if (!(await page.locator('.exit.resting').count())) throw new Error('退出の儀式で画面が静かにならない');
   await page.waitForTimeout(3200);
@@ -184,10 +215,32 @@ try {
   await page.getByRole('button', { name: /^離れる/ }).click();
   await expectText('揺れの中で、在ることができました');
 
-  log('相談窓口');
-  await page.goto(base + '#crisis');
-  await expectText('0570-064-556');
-  await shot('15-crisis');
+  log('思考の雲');
+  await page.goto(base + '#clouds');
+  await page.fill('#cloud-word', 'プレゼンのこと');
+  await page.press('#cloud-word', 'Enter');
+  await expectText('プレゼンのこと');
+  await shot('15a-clouds-setup');
+  await page.click('#clouds-start');
+  await expectText('雲を追いかけず、ただ見ています');
+  await page.clock.runFor(9000);
+  if ((await page.locator('.cloud').count()) < 2) throw new Error('雲が流れない');
+  await page.waitForTimeout(2200);
+  await shot('15b-clouds');
+  const c = page.locator('.cloud').first();
+  const cb = await c.boundingBox();
+  await page.mouse.move(cb.x + cb.width / 2, cb.y + cb.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(120, 500, { steps: 4 });
+  await expectText('つかまえると、ついていってしまう');
+  await page.mouse.up();
+  await expectText('手を離すと、また流れていく');
+  await page.clock.runFor(140000);
+  await expectText('あなたは、それを見ている空です');
+  if ((await page.textContent('#view')).includes('つかまえると')) throw new Error('雲の画面が残っている');
+  await shot('15c-clouds-end');
+  await page.mouse.click(195, 300); // 静かになった画面を、タップで起こす
+  await page.locator('.exit-actions .btn', { hasText: '閉じる' }).last().click();
 
   log('作務');
   await page.goto(base + '#samu');
@@ -232,7 +285,8 @@ try {
   await page.selectOption('#pf-theme', 'auto');
   await page.check('#pf-minimal');
   await page.goto(base + '#home');
-  await expectText('閉じて、いまへ');
+  await expectText('今日の問い');
+  if (await page.locator('.work').count()) throw new Error('ミニマルモードでワークが表示されている');
   await shot('21-home-minimal');
 
   log('すべて消去');
@@ -244,7 +298,7 @@ try {
   if (stored.moments.length !== 0 || stored.settings.minimal) throw new Error('消去されていない');
 
   log('横幅のはみ出し');
-  for (const r of ['home', 'practice', 'daily', 'sky', 'prefs', 'bells', 'haiku', 'samu', 'learn', 'anchors']) {
+  for (const r of ['home', 'practice', 'daily', 'sky', 'clouds', 'prefs', 'bells', 'haiku', 'samu', 'learn', 'anchors']) {
     await page.goto(base + '#' + r);
     const over = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     if (over > 0) throw new Error(`#${r} が横にはみ出している: ${over}px`);

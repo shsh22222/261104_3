@@ -17,7 +17,7 @@ function row({ title, sub, meta, onclick, cls = '' }) {
 }
 
 export function practiceView(root) {
-  root.append(header('実践', 'いまへの入口。どれも数分で終わります。'));
+  root.append(header('ワーク', 'いまへの入口。どれも数分で終わります。'));
 
   root.append(
     h(
@@ -26,8 +26,9 @@ export function practiceView(root) {
       h(
         'ul',
         { class: 'list' },
-        row({ title: '意識的な一呼吸', sub: 'すべての実践の最小単位', meta: '10秒', onclick: () => go('breath') }),
-        row({ title: 'いま、揺れている', sub: '怒り、不安、悲しみの中で', meta: '2分〜', onclick: () => go('sos'), cls: 'is-sos' }),
+        row({ title: '思考の雲', sub: '書いた思考が、雲になって流れていく', meta: '2分', onclick: () => go('clouds'), cls: 'is-feature' }),
+        row({ title: '意識的な一呼吸', sub: 'すべてのワークの最小単位', meta: '10秒', onclick: () => go('breath') }),
+        row({ title: 'いま、揺れている', sub: 'イライラ、焦り、モヤモヤの中で', meta: '2分〜', onclick: () => go('sos'), cls: 'is-sos' }),
       ),
     ),
   );

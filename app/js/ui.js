@@ -1,5 +1,7 @@
 // 小さな DOM ヘルパー。利用者の書いた文字は必ずテキストノードとして入れる。
 
+import { OUTWARD } from './content.js';
+
 export function h(tag, attrs, ...children) {
   const el = document.createElement(tag);
   if (attrs) {
@@ -57,12 +59,13 @@ export function chip(label, { selected = false, onclick, id } = {}) {
 }
 
 /** 練習の終わりの「退出の儀式」。しばらくすると画面そのものが静かになる。 */
-export function exitRitual({ title = 'おかえりなさい。', lines = ['画面から目を上げて、', '周りを見てください。'], actions = [] } = {}) {
+export function exitRitual({ title = '目を上げて。', lines = [], actions = [], outward = true } = {}) {
   const el = h(
     'div',
     { class: 'exit' },
     h('p', { class: 'exit-title' }, title),
-    h('p', { class: 'exit-lines' }, lines.map((l) => h('span', null, l))),
+    lines.length ? h('p', { class: 'exit-lines' }, lines.map((l) => h('span', null, l))) : null,
+    outward ? h('p', { class: 'exit-outward' }, OUTWARD[Math.floor(Math.random() * OUTWARD.length)]) : null,
     h('div', { class: 'exit-actions' }, actions),
     h('p', { class: 'exit-rest', 'aria-hidden': 'true' }, 'スマホを置いて、いまへ。'),
   );

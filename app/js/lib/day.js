@@ -40,3 +40,16 @@ export function mmss(ms) {
   const s = Math.max(0, Math.floor(ms / 1000));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
+
+/**
+ * いまの時刻の光。ホームの背景ににじませる。透明度つきなので夜／朝どちらのテーマにも馴染む。
+ * @returns {{ name: string, glow: string }}
+ */
+export function skyTone(date = new Date()) {
+  const h = date.getHours() + date.getMinutes() / 60;
+  if (h >= 4 && h < 6) return { name: '夜明け', glow: 'rgba(226, 142, 122, 0.26)' };
+  if (h >= 6 && h < 10) return { name: '朝', glow: 'rgba(238, 196, 122, 0.22)' };
+  if (h >= 10 && h < 16) return { name: '昼', glow: 'rgba(148, 194, 234, 0.22)' };
+  if (h >= 16 && h < 19) return { name: '夕暮れ', glow: 'rgba(226, 138, 88, 0.26)' };
+  return { name: '夜', glow: 'rgba(96, 112, 206, 0.22)' };
+}

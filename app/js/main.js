@@ -9,7 +9,8 @@ import { playerView } from './views/player.js';
 import { dailyView, anchorsView } from './views/daily.js';
 import { gateView } from './views/gate.js';
 import { bellsView, bellView, bellSessionView } from './views/bells.js';
-import { sosView, crisisView } from './views/sos.js';
+import { sosView } from './views/sos.js';
+import { cloudsView } from './views/clouds.js';
 import { haikuView } from './views/haiku.js';
 import { samuView } from './views/samu.js';
 import { eveningView } from './views/evening.js';
@@ -22,7 +23,7 @@ const ROUTES = {
   home: { view: homeView },
   practice: { view: practiceView },
   daily: { view: dailyView },
-  sky: { view: skyView },
+  sky: { view: skyView, tab: 'daily' },
   learn: { view: learnView, tab: 'practice' },
   prefs: { view: prefsView, tab: 'home' },
   anchors: { view: anchorsView, tab: 'daily' },
@@ -34,7 +35,7 @@ const ROUTES = {
   bell: { view: bellView, immersive: true },
   'bell-session': { view: bellSessionView, immersive: true },
   sos: { view: sosView, immersive: true },
-  crisis: { view: crisisView, immersive: true },
+  clouds: { view: cloudsView, tab: 'practice' },
   evening: { view: eveningView, immersive: true },
   welcome: { view: welcomeView, immersive: true },
   inquiry: { view: (root) => playerView(root, 'inquiry'), immersive: true },
@@ -67,7 +68,7 @@ function render() {
   }
   cleanup = null;
   stopSpeech();
-  document.body.classList.remove('is-void');
+  document.body.classList.remove('is-void', 'holding');
   view.replaceChildren();
   document.body.classList.toggle('immersive', !!route.immersive);
   document.body.dataset.route = name;

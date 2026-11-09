@@ -2,7 +2,7 @@ import { h, closeButton, chip, exitRitual } from '../ui.js';
 import { orb, runBreath } from './breath.js';
 import { back, go } from '../nav.js';
 import { addMoment } from '../store.js';
-import { EMOTIONS, BODY_PARTS, WITNESS_LINES, THREE_OPTIONS, CRISIS, CRISIS_LINK } from '../content.js';
+import { EMOTIONS, BODY_PARTS, WITNESS_LINES, THREE_OPTIONS } from '../content.js';
 import { bell, haptic, unlockAudio } from '../audio.js';
 
 const WITNESS_MS = 44000;
@@ -14,12 +14,7 @@ const WITNESS_MS = 44000;
 export function sosView(root) {
   unlockAudio();
   const stage = h('div', { class: 'stage sos' });
-  const footer = h(
-    'div',
-    { class: 'sos-foot' },
-    h('p', { class: 'fine' }, '目は開けたままで。いつでもやめて大丈夫です。'),
-    h('button', { class: 'link-btn', onclick: () => go('crisis') }, 'つらさがとても強いときは'),
-  );
+  const footer = h('div', { class: 'sos-foot' }, h('p', { class: 'fine' }, '目は開けたままで。いつでもやめて大丈夫です。'));
   root.append(h('div', { class: 'immersive-top' }, closeButton(back)), stage, footer);
 
   let stopBreath = () => {};
@@ -159,32 +154,4 @@ export function sosView(root) {
     clearTimers();
     exitEl?._cleanup?.();
   };
-}
-
-/** #crisis 相談窓口。番号は選択してコピーできるテキストとしても表示する。 */
-export function crisisView(root) {
-  root.append(
-    h('div', { class: 'immersive-top' }, closeButton(() => go('sos'), '戻る')),
-    h(
-      'div',
-      { class: 'page crisis' },
-      h('h1', { class: 'page-title', tabindex: '-1' }, 'ひとりで抱えないでください'),
-      h('p', { class: 'body-text' }, 'このアプリは、医療や心理療法の代わりにはなれません。強い苦しみが続くとき、自分を傷つけたい気持ちがあるときは、専門の窓口や身近な人を頼ってください。'),
-      h(
-        'ul',
-        { class: 'crisis-list' },
-        CRISIS.map((c) =>
-          h(
-            'li',
-            null,
-            h('p', { class: 'crisis-name' }, c.name),
-            h('p', { class: 'crisis-tel' }, h('a', { href: 'tel:' + c.tel.replace(/-/g, '') }, c.tel)),
-            h('p', { class: 'fine' }, c.note),
-          ),
-        ),
-      ),
-      h('p', { class: 'body-text' }, h('a', { href: CRISIS_LINK.url, target: '_blank', rel: 'noopener' }, CRISIS_LINK.label)),
-      h('p', { class: 'fine' }, '番号や受付時間は変わることがあります。最新の情報は上のリンクで確認してください。'),
-    ),
-  );
 }
