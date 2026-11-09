@@ -1,0 +1,18 @@
+{
+  "name": "ma-presence",
+  "version": "1.0.0",
+  "private": true,
+  "description": "間 MA — 思考と思考のあいだへ。いまに在るための PWA。",
+  "type": "module",
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "test": "node --test tests/unit/*.test.mjs",
+    "e2e": "node tests/e2e/smoke.mjs",
+    "icons": "python3 scripts/make-icons.py",
+    "build:preview": "node scripts/build-preview.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}
